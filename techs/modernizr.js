@@ -66,7 +66,7 @@ module.exports = require('enb/lib/build-flow').create()
                 file.writeFileContent(sourcePath, source);
                 file.writeContent(
                     'modules.define(\'modernizr\', function(provide) {\n' +
-                        modernizrResult + '\n' +
+                        '(function(){' + modernizrResult + '})();\n' +
                         'var Modernizr = window.Modernizr;\n' +
                         'try { delete window.Modernizr; } catch (e) {}\n' +
                         'provide(Modernizr);\n' +
