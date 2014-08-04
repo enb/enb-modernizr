@@ -41,18 +41,22 @@ module.exports = require('enb/lib/build-flow').create()
             if (prevModernizrFeatureKey === modernizrFeatureKey) {
                 modernizrPromise = vow.when(prevModernizrResult);
             } else {
-                var modernizrDefer = vow.defer();
-                modernizrPromise = modernizrDefer.promise();
-                modernizr.build({
-                    'classPrefix': 'm-',
-                    'options': [
-                        'prefixedCSS',
-                        'setClasses'
-                    ],
-                    'feature-detects': modernizrFeatures
-                }, function (result) {
-                    modernizrDefer.resolve(result.code);
-                });
+                if (modernizrFeatures.length > 0) {
+                    var modernizrDefer = vow.defer();
+                    modernizrPromise = modernizrDefer.promise();
+                    modernizr.build({
+                        'classPrefix': 'm-',
+                        'options': [
+                            'prefixedCSS',
+                            'setClasses'
+                        ],
+                        'feature-detects': modernizrFeatures
+                    }, function (result) {
+                        modernizrDefer.resolve(result.code);
+                    });
+                } else {
+                    modernizrPromise = vow.when('');
+                }
             }
             return modernizrPromise.then(function (code) {
                 cache.set('modernizr-features', modernizrFeatureKey);
