@@ -50,7 +50,9 @@ module.exports = require('enb/lib/build-flow').create()
                             'prefixedCSS',
                             'setClasses'
                         ],
-                        'feature-detects': modernizrFeatures
+                        'feature-detects': modernizrFeatures.map(function (feature) {
+                            return 'test/' + feature;
+                        })
                     }, function (result) {
                         modernizrDefer.resolve(result.code);
                     });
@@ -58,11 +60,18 @@ module.exports = require('enb/lib/build-flow').create()
                     modernizrPromise = vow.when('');
                 }
             }
-            return modernizrPromise.then(function (code) {
+            return modernizrPromise.then(function (modernizrResult) {
                 cache.set('modernizr-features', modernizrFeatureKey);
-                cache.set('modernizr-result', code);
+                cache.set('modernizr-result', modernizrResult);
                 file.writeFileContent(sourcePath, source);
-                file.writeContent(code);
+                file.writeContent(
+                    'modules.define(\'modernizr\', function(provide) {\n' +
+                        modernizrResult + '\n' +
+                        'var Modernizr = window.Modernizr;\n' +
+                        'try { delete window.Modernizr; } catch (e) {}\n' +
+                        'provide(Modernizr);\n' +
+                    '});'
+                );
                 return file.render();
             });
         });
