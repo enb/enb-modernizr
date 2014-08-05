@@ -42,9 +42,7 @@ module.exports = require('enb/lib/build-flow').create()
                 modernizrPromise = vow.when(prevModernizrResult);
             } else {
                 if (modernizrFeatures.length > 0) {
-                    var modernizrDefer = vow.defer();
-                    modernizrPromise = modernizrDefer.promise();
-                    modernizr.build({
+                    modernizrPromise = modernizrBuild({
                         'classPrefix': 'm-',
                         'options': [
                             'prefixedCSS',
@@ -53,8 +51,6 @@ module.exports = require('enb/lib/build-flow').create()
                         'feature-detects': modernizrFeatures.map(function (feature) {
                             return 'test/' + feature;
                         })
-                    }, function (result) {
-                        modernizrDefer.resolve(result.code);
                     });
                 } else {
                     modernizrPromise = vow.when('');
@@ -77,3 +73,14 @@ module.exports = require('enb/lib/build-flow').create()
         });
     })
     .createTech();
+
+function modernizrBuild(options) {
+    modernizrBuild._prevBuildPromise = modernizrBuild._prevBuildPromise || vow.fulfill();
+    return modernizrBuild._prevBuildPromise = modernizrBuild._prevBuildPromise.then(function () {
+        var modernizrDefer = vow.defer();
+        modernizr.build(options, function (result) {
+            modernizrDefer.resolve(result.code);
+        });
+        return modernizrDefer.promise();
+    });
+}
