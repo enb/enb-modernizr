@@ -15,6 +15,7 @@ module.exports = require('enb/lib/build-flow').create()
         var file = new File(this.node.resolvePath(this._target), this._useSourceMap);
         var sourcePath = this._source;
         var cache = this.node.getNodeCache(this._target);
+        var buildState = this.node.buildState;
 
         return vow.all(depFiles.map(function (fileInfo) {
             return vowFs.read(fileInfo.fullname, 'utf8').then(function (data) {
@@ -42,16 +43,21 @@ module.exports = require('enb/lib/build-flow').create()
                 modernizrPromise = vow.when(prevModernizrResult);
             } else {
                 if (modernizrFeatures.length > 0) {
-                    modernizrPromise = modernizrBuild({
-                        'classPrefix': 'm-',
-                        'options': [
-                            'prefixedCSS',
-                            'setClasses'
-                        ],
-                        'feature-detects': modernizrFeatures.map(function (feature) {
-                            return 'test/' + feature;
-                        })
-                    });
+                    var modernizrBuildStateKey = 'modernizr-' + modernizrFeatureKey;
+                    modernizrPromise = buildState[modernizrBuildStateKey];
+                    if (!modernizrPromise) {
+                        modernizrPromise = modernizrBuild({
+                            'classPrefix': 'm-',
+                            'options': [
+                                'prefixedCSS',
+                                'setClasses'
+                            ],
+                            'feature-detects': modernizrFeatures.map(function (feature) {
+                                return 'test/' + feature;
+                            })
+                        });
+                        buildState[modernizrBuildStateKey] = modernizrPromise;
+                    }
                 } else {
                     modernizrPromise = vow.when('');
                 }
