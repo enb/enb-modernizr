@@ -75,12 +75,12 @@ module.exports = require('enb/lib/build-flow').create()
     .createTech();
 
 function modernizrBuild(options) {
-    modernizrBuild._prevBuildPromise = modernizrBuild._prevBuildPromise || vow.fulfill();
-    return modernizrBuild._prevBuildPromise = modernizrBuild._prevBuildPromise.then(function () {
+    modernizrBuild._prevBuildPromise = (modernizrBuild._prevBuildPromise || vow.fulfill()).then(function () {
         var modernizrDefer = vow.defer();
         modernizr.build(options, function (result) {
             modernizrDefer.resolve(result.code);
         });
         return modernizrDefer.promise();
     });
+    return modernizrBuild._prevBuildPromise;
 }
