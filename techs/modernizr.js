@@ -67,13 +67,12 @@ module.exports = require('enb/lib/build-flow').create()
                 cache.set('modernizr-result', modernizrResult);
                 file.writeFileContent(sourcePath, source);
                 file.writeContent(
-                    'modules.define(\'modernizr\', function(provide) {\n' +
-                        modernizrResult + '\n' +
+                    modernizrResult + '\n' +
+                    '(function () {\n' +
                         'var Modernizr = window.Modernizr;\n' +
                         'try { delete window.Modernizr; } catch (e) {}\n' +
-                        'provide(Modernizr);\n' +
-                    '});\n' +
-                    'modules.require(\'modernizr\', function() {});'
+                        'modules.define(\'modernizr\', function (provide) { provide(Modernizr); });\n' +
+                    '})();\n'
                 );
                 return file.render();
             });
