@@ -1,7 +1,7 @@
 var vow = require('vow');
 var vowFs = require('enb/lib/fs/async-fs');
 var yaml = require('js-yaml');
-var modernizr = require('ym-modernizr');
+var modernizr = require('modernizr');
 var File = require('enb-source-map/lib/file');
 
 module.exports = require('enb/lib/build-flow').create()
@@ -84,7 +84,7 @@ function modernizrBuild(options) {
     modernizrBuild._prevBuildPromise = (modernizrBuild._prevBuildPromise || vow.fulfill()).then(function () {
         var modernizrDefer = vow.defer();
         modernizr.build(options, function (result) {
-            modernizrDefer.resolve(result.code);
+            modernizrDefer.resolve(result);
         });
         return modernizrDefer.promise();
     });
